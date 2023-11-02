@@ -1,3 +1,5 @@
+import { Vector } from "./src/vector.js";
+
 class Line {
     constructor(startX, startY, endX, endY, decay = 1) {
         for (const x of [startX, startY, endX, endY]) {
@@ -11,7 +13,9 @@ class Line {
         this.endX = endX;
         this.endY = endY;
         this.progress = 0;
-        this.delta = 0.01;
+
+        // Percentage completion per ms.
+        this.delta = Math.random()
 
         // Decay factor for branching.
         this.decay = decay;
@@ -108,23 +112,29 @@ class Animation {
     // (assuming the line has already been reversed).
     branch(l) {
         // Get original vector and branching point.
-        const originalVector = this.getVectorFromLine(l);
+        // FIXME:
+        let v = this.getVectorFromLine(l);
+        v = new Vector(v[0], v[1]);
+
         let [startX, startY] = [l.endX, l.endY];
         if (l.erasing) {
             [startX, startY] = [l.startX, l.startY];
         }
 
+        // Decide whether or not to branch.
+        l.branched = true;
+        if (Math.random() > 0.9 / l.decay) {
+            return;
+        }
+
         // Create branches.
-        const branchProbability = 0.8 / l.decay;
-        while (Math.random() < branchProbability) {
-            let v = this.normalizeVector(originalVector);
-            v = this.skewVector(v, 0.7);
+        const branches = Math.floor(Math.random() + 2);
+        for (let i = 0; i < branches; i++) {
+            v.randomRotate(Math.PI / 3);
+            v.normalize();
+            v.scale(Math.random() * 100 + 50);
 
-            // TODO: Refactor this too?
-            const length = Math.random() * 100 + 50;
-            v = this.scaleVector(v, length);
-
-            const [endX, endY] = [startX + v[0], startY + v[1]];
+            const [endX, endY] = [startX + v.x, startY + v.y];
             if (
                 startX >= 0 &&
                 startY >= 0 &&
@@ -132,11 +142,10 @@ class Animation {
                 endY < this.canvas.height
             ) {
                 this.lines.push(
-                    new Line(startX, startY, endX, endY, l.decay * 3)
+                    new Line(startX, startY, endX, endY, l.decay + 3)
                 );
             }
         }
-        l.branched = true;
     }
 
     // Get vector from line.
@@ -152,18 +161,17 @@ class Animation {
     // center.
     getInitialLine() {
         const [x, y] = this.getBorderPoint();
+        // FIXME:
         let v = this.getVectorToCenter(x, y);
+        v = new Vector(v[0], v[1]);
 
-        // TODO: Refactor to global skew factor or make random.
-        // TODO: While at it, probably create a Vector class to hold all this logic.
-        v = this.normalizeVector(v);
-        v = this.skewVector(v, 0.7);
+        v.rotate(Math.PI / 6);
+        v.normalize();
+        v.scale(Math.random() * 100 + 50);
 
-        // TODO: Refactor this too?
-        const length = Math.random() * 100 + 50;
-        v = this.scaleVector(v, length);
-
-        return new Line(x, y, x + v[0], y + v[1]);
+        const l = new Line(x, y, x + v.x, y + v.y);
+        console.log(l);
+        return l;
     }
 
     // Get a random point on the border of the canvas with uniform distribution.
@@ -199,31 +207,6 @@ class Animation {
         const cy = h / 2;
 
         return [cx - x, cy - y];
-    }
-
-    // Randomly skew a given vector v by a factor k ([0, 1]).
-    skewVector(v, k) {
-        if (k < 0 || k > 1) {
-            throw new Error("invalid skew factor");
-        }
-
-        const skewX = Math.random() * k;
-        const skewY = Math.random() * k;
-
-        return [v[0] + skewX, v[1] + skewY];
-    }
-
-    // Normalize the given vector.
-    normalizeVector(v) {
-        const [x, y] = v;
-        const length = Math.sqrt(x * x + y * y);
-
-        return [x / length, y / length];
-    }
-
-    // Scale the given vector.
-    scaleVector(v, k) {
-        return [v[0] * k, v[1] * k];
     }
 }
 
