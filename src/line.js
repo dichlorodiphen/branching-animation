@@ -1,8 +1,8 @@
-import { Vector } from "./vector";
+import { Vector } from "./vector.js";
 
 export class Line {
     // NOTE: Duration is in ms.
-    constructor(startX, startY, endX, endY, decay = 1, duration = 1000) {
+    constructor(startX, startY, endX, endY, decay = 1, duration) {
         for (const x of [startX, startY, endX, endY]) {
             if (isNaN(x)) {
                 throw new Error("invalid value in constructor");
@@ -16,6 +16,9 @@ export class Line {
         this.progress = 0;
 
         // Percentage completion per ms.
+        if (!duration) {
+            duration = Math.random() * 1000 + 500;
+        }
         this.delta = 1 / duration;
 
         // Decay factor for branching.
@@ -50,9 +53,9 @@ export class Line {
 
     getVector() {
         if (this.erasing) {
-            return [this.startX - this.endX, this.startY - this.endY];
+            return new Vector(this.startX - this.endX, this.startY - this.endY);
         }
 
-        return [this.endX - this.startX, this.endY - this.startY];
+        return new Vector(this.endX - this.startX, this.endY - this.startY);
     }
 }

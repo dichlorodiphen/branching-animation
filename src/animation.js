@@ -8,18 +8,23 @@ export class Animation {
         this.lines = [];
 
         // Styling
-        this.ctx.lineWidth = 3;
+        this.ctx.lineWidth = 1;
         this.ctx.shadowBlur = 10;
-        this.ctx.shadowColor = "purple";
-        this.ctx.strokeStyle = "purple";
+        this.ctx.shadowColor = "#DEB9F6";
+        this.ctx.strokeStyle = "#DEB9F6";
+        this.ctx.lineCap = "round";
+        this.ctx.fillStyle = "#1A171C";
     }
 
     // Start animation.
     start() {
-        // this.intervalID = setInterval(() => {
-        //     this.lines.push(this.getInitialLine());
-        //     window.requestAnimationFrame(this.draw.bind(this));
-        // }, 4000);
+        if (this.intervalID) {
+            clearInterval(this.intervalID);
+        }
+        this.intervalID = setInterval(() => {
+            this.lines.push(this.getInitialLine());
+            window.requestAnimationFrame(this.draw.bind(this));
+        }, 4000);
     }
 
     // Stop animation.
@@ -60,7 +65,7 @@ export class Animation {
 
     // Draw next frame.
     draw(timestamp) {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (const l of this.lines) {
             if (!l.startTime) {
@@ -74,7 +79,7 @@ export class Animation {
             this.ctx.stroke();
 
             if (l.erasing) {
-                if (l.progress < 0.1 && !l.branched) {
+                if (l.progress < 0.3 && !l.branched) {
                     this.branch(l);
                 } else if (l.progress < 0) {
                     this.remove(l);
@@ -108,7 +113,6 @@ export class Animation {
     // (assuming the line has already been reversed).
     branch(l) {
         // Get original vector and branching point.
-        // FIXME:
         const v = l.getVector();
 
         let [startX, startY] = [l.endX, l.endY];
@@ -123,11 +127,23 @@ export class Animation {
         }
 
         // Create branches.
-        const branches = Math.floor(Math.random() + 2);
+        // TODO: Pull into config.
+        const minBranches = 1;
+        const maxBranches = 2;
+        const branches = Math.floor(
+            Math.random() * (maxBranches - minBranches + 1) + minBranches
+        );
+
+        const startAngle = -Math.PI / 2;
+        const endAngle = Math.PI / 2;
+        const range = (endAngle - startAngle) / branches;
         for (let i = 0; i < branches; i++) {
-            v.randomRotate(Math.PI / 3);
+            v.randomRotate(
+                startAngle + range * i,
+                startAngle + range * (i + 1)
+            );
             v.normalize();
-            v.scale(Math.random() * 100 + 50);
+            v.scale(Math.random() * 150 + 50);
 
             const [endX, endY] = [startX + v.x, startY + v.y];
             if (
@@ -137,7 +153,7 @@ export class Animation {
                 endY < this.canvas.height
             ) {
                 this.lines.push(
-                    new Line(startX, startY, endX, endY, l.decay + 3)
+                    new Line(startX, startY, endX, endY, l.decay + 2)
                 );
             }
         }
@@ -149,12 +165,11 @@ export class Animation {
         const [x, y] = this.getBorderPoint();
         const v = this.getVectorToCenter(x, y);
 
-        v.rotate(Math.PI / 6);
+        v.randomRotate(-Math.PI / 6, Math.PI / 6);
         v.normalize();
-        v.scale(Math.random() * 100 + 50);
+        v.scale(Math.random() * 150 + 50);
 
         const l = new Line(x, y, x + v.x, y + v.y);
-        console.log(l);
         return l;
     }
 

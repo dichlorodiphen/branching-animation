@@ -23,12 +23,13 @@ export class Vector {
     }
 
     /**
-     * Randomly rotate the vector.
+     * Randomly rotate the vector counterclockwise.
      *
-     * @param {Number} rad the maximum angle to rotate by in either direction, in radians
+     * @param {Number} min minimum angle to rotate by, in radians
+     * @param {Number} max the maximum angle to rotate by, in radians.
      */
-    randomRotate(rad) {
-        const angle = Math.random() * 2 * rad - rad;
+    randomRotate(min, max) {
+        const angle = Math.random() * (max - min) + min;
         this.rotate(angle);
     }
 
@@ -43,7 +44,6 @@ export class Vector {
 
         this.x = x * Math.cos(rad) - y * Math.sin(rad);
         this.y = x * Math.sin(rad) + y * Math.cos(rad);
-        console.log(x, y);
     }
 
     /**
