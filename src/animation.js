@@ -28,6 +28,25 @@ export class Animation {
     }
 
     /**
+     * A quartic ease-in-out timing function.
+     *
+     * Taken from https://easings.net/#easeInOutQuart.
+     *
+     * @param {Number} x value between 0 and 1
+     * @returns the result of the easing function
+     */
+    easingFunction(x) {
+        if (x >= 1) {
+            return 1;
+        }
+        if (x <= 0) {
+            return 0;
+        }
+
+        return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
+    }
+
+    /**
      * Performs linear interpolation with given arguments.
      *
      * @param {*} start start value
@@ -60,12 +79,14 @@ export class Animation {
                 } else if (l.progress < 0) {
                     this.remove(l);
                 } else {
-                    l.progress = 1 - l.delta * elapsed;
+                    l.progress = 1 - this.easingFunction(l.delta * elapsed);
+                    console.log("erasing: ", l.progress);
                     l.x = this.lerp(l.startX, l.endX, l.progress);
                     l.y = this.lerp(l.startY, l.endY, l.progress);
                 }
             } else if (l.progress < 1 && l.progress >= 0) {
-                l.progress = l.delta * elapsed;
+                l.progress = this.easingFunction(l.delta * elapsed);
+                console.log("drawing: ", l.progress);
                 l.x = this.lerp(l.startX, l.endX, l.progress);
                 l.y = this.lerp(l.startY, l.endY, l.progress);
             } else if (l.progress >= 1) {

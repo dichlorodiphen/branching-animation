@@ -1,6 +1,6 @@
 export class Line {
     // NOTE: Duration is in ms.
-    constructor(startX, startY, endX, endY, decay = 1, duration = 500) {
+    constructor(startX, startY, endX, endY, decay = 1, duration = 1000) {
         for (const x of [startX, startY, endX, endY]) {
             if (isNaN(x)) {
                 throw new Error("invalid value in constructor");
