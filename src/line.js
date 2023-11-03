@@ -1,3 +1,5 @@
+import { Vector } from "./vector";
+
 export class Line {
     // NOTE: Duration is in ms.
     constructor(startX, startY, endX, endY, decay = 1, duration = 1000) {
@@ -44,5 +46,13 @@ export class Line {
         this.startY = this.endY;
         this.endX = startX;
         this.endY = startY;
+    }
+
+    getVector() {
+        if (this.erasing) {
+            return [this.startX - this.endX, this.startY - this.endY];
+        }
+
+        return [this.endX - this.startX, this.endY - this.startY];
     }
 }

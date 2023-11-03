@@ -16,10 +16,10 @@ export class Animation {
 
     // Start animation.
     start() {
-        this.intervalID = setInterval(() => {
-            this.lines.push(this.getInitialLine());
-            window.requestAnimationFrame(this.draw.bind(this));
-        }, 4000);
+        // this.intervalID = setInterval(() => {
+        //     this.lines.push(this.getInitialLine());
+        //     window.requestAnimationFrame(this.draw.bind(this));
+        // }, 4000);
     }
 
     // Stop animation.
@@ -60,10 +60,6 @@ export class Animation {
 
     // Draw next frame.
     draw(timestamp) {
-        // TODO: Probably unnecessary.
-        if (this.lines.length === 0) {
-            return;
-        }
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (const l of this.lines) {
@@ -113,8 +109,7 @@ export class Animation {
     branch(l) {
         // Get original vector and branching point.
         // FIXME:
-        let v = this.getVectorFromLine(l);
-        v = new Vector(v[0], v[1]);
+        const v = l.getVector();
 
         let [startX, startY] = [l.endX, l.endY];
         if (l.erasing) {
@@ -148,22 +143,11 @@ export class Animation {
         }
     }
 
-    // Get vector from line.
-    getVectorFromLine(l) {
-        if (l.erasing) {
-            return [l.startX - l.endX, l.startY - l.endY];
-        }
-
-        return [l.endX - l.startX, l.endY - l.startY];
-    }
-
     // Randomly generate a line directed from the edge of the canvas to the
     // center.
     getInitialLine() {
         const [x, y] = this.getBorderPoint();
-        // FIXME:
-        let v = this.getVectorToCenter(x, y);
-        v = new Vector(v[0], v[1]);
+        const v = this.getVectorToCenter(x, y);
 
         v.rotate(Math.PI / 6);
         v.normalize();
@@ -206,6 +190,6 @@ export class Animation {
         const cx = w / 2;
         const cy = h / 2;
 
-        return [cx - x, cy - y];
+        return new Vector(cx - x, cy - y);
     }
 }
