@@ -29,6 +29,9 @@ export class Line {
     // Begin erasing line from end.
     erase() {
         this.reverse();
+        this.progress = 1;
+        this.x = this.endX;
+        this.y = this.endY;
         this.erasing = true;
     }
 

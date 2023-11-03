@@ -16,10 +16,10 @@ export class Animation {
 
     // Start animation.
     start() {
-        // this.intervalID = setInterval(() => {
-        //     this.lines.push(this.getInitialLine());
-        //     window.requestAnimationFrame(this.draw.bind(this));
-        // }, 4000);
+        this.intervalID = setInterval(() => {
+            this.lines.push(this.getInitialLine());
+            window.requestAnimationFrame(this.draw.bind(this));
+        }, 4000);
     }
 
     // Stop animation.
@@ -60,6 +60,10 @@ export class Animation {
 
     // Draw next frame.
     draw(timestamp) {
+        // TODO: Probably unnecessary.
+        if (this.lines.length === 0) {
+            return;
+        }
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         for (const l of this.lines) {
@@ -80,13 +84,11 @@ export class Animation {
                     this.remove(l);
                 } else {
                     l.progress = 1 - this.easingFunction(l.delta * elapsed);
-                    console.log("erasing: ", l.progress);
                     l.x = this.lerp(l.startX, l.endX, l.progress);
                     l.y = this.lerp(l.startY, l.endY, l.progress);
                 }
             } else if (l.progress < 1 && l.progress >= 0) {
                 l.progress = this.easingFunction(l.delta * elapsed);
-                console.log("drawing: ", l.progress);
                 l.x = this.lerp(l.startX, l.endX, l.progress);
                 l.y = this.lerp(l.startY, l.endY, l.progress);
             } else if (l.progress >= 1) {
